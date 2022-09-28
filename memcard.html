@@ -238,7 +238,8 @@ function SayCurrWord()
     const data = WordData(0);
     
     let utter = new SpeechSynthesisUtterance();
-    utter.lang = 'en-US';
+    //utter.lang = 'en-US';
+    utter.lang = 'de-DE';
     utter.text = data.word;
     utter.volume = 1.0;  
     utter.rate = 0.85;   
