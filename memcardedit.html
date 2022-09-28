@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+  <head>
+
+
+<style>     
+    
+@keyframes glowing {
+  0%   { background-color: #ffe540; box-shadow: 0 0 3px #ffe540; }
+  50%  { background-color: #ffdc00; box-shadow: 0 0 30px #ffdc00; }
+  100% { background-color: #ffe540; box-shadow: 0 0 3px #ffe540; }
+}
+
+
+
+
+
+.glowbutton {
+  animation: glowing 1500ms infinite;
+
+}
+
+</style>     
+    
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+
+    <script src="serverapi.js"></script>
+
+    <title>Languge Cards Edit</title>
+  </head>
+
+  <body>
+
+
+
+
+
+<script>
+
+
+
+$(document).ready(function() {
+    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+});
+
+
+
+
+function parse_query_string(query) 
+{
+  var vars = query.split("&");
+  var query_string = {};
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split("=");
+    var key = decodeURIComponent(pair.shift());
+    var value = decodeURIComponent(pair.join("="));
+    // If first entry with this name
+    if (typeof query_string[key] === "undefined") {
+      query_string[key] = value;
+      // If second entry with this name
+    } else if (typeof query_string[key] === "string") {
+      var arr = [query_string[key], value];
+      query_string[key] = arr;
+      // If third or later entry with this name
+    } else {
+      query_string[key].push(value);
+    }
+  }
+  return query_string;
+}
+
+
+
+var CurrCollectionName = parse_query_string(window.location.search.substring(1)).name;
+
+
+
+function UpdateDropdown()
+{
+    
+    var cname = CurrCollectionName;
+    var cnames = CurrCollections;
+  
+
+    var html = [];
+    html.push('<div class="dropdown">');
+    html.push('  <button class="btn btn-secondary dropdown-toggle " type="button" id="CollectionsDopdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">');
+    html.push(cname);
+    html.push('   </button>');
+    
+    html.push('<ul class="dropdown-menu" aria-labelledby="CollectionsDopdownMenuButton">');
+    
+    for(const cn of cnames)
+        html.push('<li><a class="dropdown-item" onclick="OnCollectionMenuClick(\''+cn+'\');">'+cn+'</a></li>');
+    
+    html.push('<li><hr class="dropdown-divider"></li>');
+    html.push('<li><a class="dropdown-item text-danger" onclick="OnWorkMenuClick();">Work</a></li>');
+    
+    html.push('</ul>');
+    
+    html.push('</div>');
+    
+    
+    $('#idcol').html(html.join(''));
+
+}
+
+
+function OnWorkMenuClick()
+{
+    window.location.href = '/memcard.html';
+}
+
+
+function OnCollectionMenuClick(name)
+{
+    CurrCollectionName = name;
+    ServerAPI_List();
+}
+
+
+function ServerAPI_List()
+{
+    LockUI(true);
+    ServerAPI({ id:'MemCard', action:'list'}, OnMCList );
+}
+
+
+
+function OnMCList(req, res) 
+{
+    console.log('OnMCList',req, res);
+    
+    
+    LockUI(false);
+    
+    var fns = res.result;
+    CurrCollections = fns;
+    
+    
+    if (CurrCollections.length==0)
+    {
+        LimitUI();
+        return;
+    }
+    
+    if (CurrCollectionName==null)
+        CurrCollectionName = CurrCollections[0];
+    
+
+    UpdateDropdown();
+
+    $('#colnewnameid').val(CurrCollectionName);
+    
+    LoadFile();
+
+}
+
+function LockUI(islock)
+{
+    $("input").attr("disabled", islock);
+    $("textarea").attr("disabled", islock);
+    $("button").attr("disabled",islock);
+
+}
+
+function LimitUI()
+{
+    MarkTextChanged(false);
+
+    CurrCollections = null;
+    CurrCollectionName = null;
+    
+    $('#idcol').html('');
+    $('#colnewnameid').val('');
+    $('#filetextid').val('');
+    
+    $('#buttonloadid').attr("disabled",true);
+    $('#buttonsaveid').attr("disabled",true);
+    $('#buttonnewid' ).attr("disabled",false);
+    $('#buttondelid' ).attr("disabled",true);
+    $('#buttoncopyid').attr("disabled",true);
+
+}
+
+
+function LoadFile()
+{
+    LockUI(true);
+    ServerAPI({ id:'MemCard', action:'getraw', file:CurrCollectionName, newfile:null  }, OnLoaded);
+   
+}
+
+function SaveFile()
+{
+    LockUI(true);
+    ServerAPI({ id:'MemCard', action:'setraw', file:CurrCollectionName, newfile:$('#colnewnameid').val(), text:$('#filetextid').val() }, OnSaved);
+    
+}
+
+function NewFile()
+{
+    LockUI(true);
+    ServerAPI({ id:'MemCard', action:'new'  }, OnNewCreated);
+}
+
+function CopyFile()
+{
+    LockUI(true);
+    ServerAPI({ id:'MemCard', action:'copy',file:CurrCollectionName, newfile:$('#colnewnameid').val() }, OnNewCreated);
+}
+
+
+function DeleteFile()
+{
+    LockUI(true);
+    ServerAPI({ id:'MemCard', action:'del',file:CurrCollectionName, }, OnDeleted);
+}
+
+function AskDeleteFile()
+{
+
+    $('#dialogtextid').html('You are about to delete collection "'+CurrCollectionName+'". Are you sure?')
+    ModalDialogYesNo.show();
+    
+}
+
+
+
+function OnLoaded(req, res) 
+{
+   LockUI(false);
+   console.log('OnLoaded',req, res);
+   
+   if (CurrCollectionName!=req.file)
+   {    $('#filetextid').val('wrong name');
+        return;
+   }
+   
+   $('#filetextid').val(res.result);
+   MarkTextChanged(false);
+
+}
+
+function OnSaved(req, res) 
+{
+    console.log('OnSaved',req, res);
+    LockUI(false);
+    
+    if (req.newfile!=CurrCollectionName)
+    {
+        CurrCollectionName = req.newfile;
+        ServerAPI_List();
+    }
+
+    MarkTextChanged(false);
+
+}
+
+
+function OnNewCreated(req, res) 
+{
+    console.log('OnNew',req, res);
+    LockUI(false);
+    
+    CurrCollectionName = res.result;
+    ServerAPI_List();
+    
+}
+
+function OnDeleted(req, res) 
+{
+    console.log('OnDelete',req, res);
+    LockUI(false);
+    
+    CurrCollectionName = null;
+    ServerAPI_List();
+    
+}
+
+
+
+function MarkTextChanged(ismarked)
+{
+    console.log("MarkTextChanged",ismarked);
+
+    if (ismarked)
+    {   //$('#filetextid').addClass('is-invalid');
+        $('#buttonsaveid').addClass('glowbutton')
+        $('#buttonsaveid').addClass('btn-warning');
+        $('#buttonsaveid').removeClass('btn-secondary');
+    } else
+    {   //$('#filetextid').removeClass('is-invalid');
+        $('#buttonsaveid').addClass('btn-secondary');
+        $('#buttonsaveid').removeClass('glowbutton')
+        $('#buttonsaveid').removeClass('btn-warning');
+    }
+}
+
+
+</script>
+
+
+
+<div class="modal fade" id="dialogid" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Delete Collection</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id = "dialogtextid" ></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+        <button type="button" class="btn btn-danger" onclick="ModalDialogYesNo.hide();DeleteFile();">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div   class="m-2"  >
+    <form>
+       <div class="input-group">
+          <div class="me-1" id="idcol"></div>
+          <input type="text" id="colnewnameid" class="form-control" oninput="MarkTextChanged(true);">
+       </div>
+    </form>
+</div>
+
+
+
+<div  class="m-2 text-center" >
+    <button id="buttonloadid" onclick="LoadFile();"       type="button" class="btn-success    btn m-2"  data-toggle="tooltip" title="Load"   ><i class="bi bi-cloud-download"></i></button>
+    <button id="buttonsaveid" onclick="SaveFile();"       type="button" class="btn-secondary  btn m-2"  data-toggle="tooltip" title="Save"   ><i class="bi bi-cloud-upload"></i></button>
+    <button id="buttonnewid"  onclick="NewFile();"        type="button" class="btn-primary    btn m-2"  data-toggle="tooltip" title="New"    ><i class="bi bi-file-earmark-plus"></i></button>
+    <button id="buttondelid"  onclick="AskDeleteFile();"  type="button" class="btn-danger     btn m-2"  data-toggle="tooltip" title="Delete" ><i class="bi bi-file-earmark-x"></i></i></button>    
+    <button id="buttoncopyid" onclick="CopyFile();"       type="button" class="btn-info       btn m-2"  data-toggle="tooltip" title="Copy"   ><i class="bi bi-files"></i></button> 
+</div>
+
+<div  class="m-2" >
+    <textarea class="form-control" id="filetextid" rows="20" oninput="MarkTextChanged(true);"></textarea>
+</div>
+
+<script>
+
+
+
+var ModalDialogYesNo = new bootstrap.Modal(document.getElementById('dialogid'))
+
+ServerAPI_List();
+
+
+
+</script>
+
+
+
+  </body>
+</html>
