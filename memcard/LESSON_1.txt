@@ -1,0 +1,45 @@
+#SSS BBB
+
+
+
+der_Stadtplan - карта мiста
+
+
+stimmen - бути правильним
+die beiden - обидва
+suchen - шукати
+etwas - щось
+die Menschen - людина
+anmache - вмикати
+ausmache - вимикати
+abbiegen - повернути
+geradeaus - прямо
+wenden - розвернутися
+zurück - назад
+helfen - допомагати 
+kennen - знати
+in der Nähe - поблизу
+der Stadmitte - центр мiста
+der Dom - собор
+Ampel - свiтлофор
+gratulieren - вiтати
+geben - давати
+schenken - дарувати
+begegnen - зустрiчати
+gehören - належати
+fehlen - бракувати
+gefallen - подобатись
+vertraumen - довiряти
+passen - пасувати
+stehen - пасуе
+das_fahrrad - велосипед
+die_Treppe_hoch - сходи
+in  - в
+an - біля, на вертикальні поверхні
+auf - на гориз.пов.
+vor - перед
+hinter - позаду
+unter - під 
+über - над 
+zwischen - між
+neben - поруч
