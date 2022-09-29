@@ -248,12 +248,26 @@ function SayCurrWord()
     window.speechSynthesis.speak(utter);
 }
 
+function SetWord(wordstr)
+{
+    const WORD_TOO_LONG = 15;
+
+    $('#idword').html(wordstr);
+    if (wordstr.length>=WORD_TOO_LONG)
+    {   $('#idword').removeClass('text-nowrap');    
+    } else
+    {   $('#idword').addClass('text-nowrap');
+    } 
+}
+
 function CreateCard(moveindex)
 {
+
     //console.log("CreateCard",moveindex);
 
     const data = WordData(moveindex);
-    $('#idword').html(data.word.toString());
+
+    SetWord(data.word.toString());
     $('#idtrans').html(data.trans.toString());
     $('#idtrans').hide();
 

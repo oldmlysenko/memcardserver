@@ -77,6 +77,8 @@ class MemCard(AjaxReqProcessor):
 
     COMMENT_CHAR = '#'
 
+    SEPARATOR_STR = " -"
+
     def __init__(self,dirname,bakdirname):
         super().__init__()
         self.dir = dirname
@@ -137,17 +139,42 @@ class MemCard(AjaxReqProcessor):
         return res;
         
         
-    def ParseDictLine(self,text):
-        text = text.replace("-", " " )
+        
+    def ComposeTransDict(self,wordstr,transstr=""):
+        wordstr = wordstr.replace("_", " " ).strip()
+        transstr = transstr.strip()
+        if (len(wordstr)==0):
+            return None
+        if (len(transstr)==0):
+            transstr = "???"
+        return { 'word': wordstr, 'trans': transstr  }
+        
+    def ParseDictLineDash(self,dashpos,text):   
+        w = text[0:dashpos]
+        t = text[dashpos+len(self.SEPARATOR_STR):]
+        return self.ComposeTransDict(w,t);
+
+
+    def ParseDictLineSpace(self,text):   
         p = text.split()
         if (len(p)==0):
             return None
-        if (p[0].startswith(self.COMMENT_CHAR)):
-            return None
+        w = p[0]
         if (len(p)==1):
-            return { 'word': p[0], 'trans':'???' }
+            return self.ComposeTransDict(w);
+        t = " ".join(p[1:])
+        return self.ComposeTransDict(w,t);
+
+        
+    def ParseDictLine(self,text):
+        text = text.strip()
+        if (text.startswith(self.COMMENT_CHAR)):
+            return None
+        n = text.find(self.SEPARATOR_STR)
+        if (n != -1):
+            return self.ParseDictLineDash(n,text)
+        return self.ParseDictLineSpace(text)
             
-        return { 'word': p[0], 'trans':" ".join(p[1:])  }
         
         
     def Get(self,filename):
