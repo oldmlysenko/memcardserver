@@ -95,7 +95,7 @@ function handleTouchMove(evt)
         {
             ShowCard();
         } else { 
-            ArchiveCard();
+            ShuffleWords();
         }                                                                 
     }
     /* reset values */
@@ -293,10 +293,32 @@ function ShowCard()
     $('#idtrans').show();
 }
 
-function ArchiveCard()
+function ShuffleWords()
 {
+    if ((CurrWords ==null) || (CurrWords.length==0))
+        return;
+
+    CurrWords = Shuffle(CurrWords);
+   
+    CurrWordIndex = NOTSET;
+    CreateCard(0);
 
 }
+
+
+function Shuffle(array) 
+{
+    let currentIndex = array.length,  randomIndex;
+    while (currentIndex != 0) 
+    {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+  return array;
+}
+
+
 
 
 function OnEditMenuClick()
@@ -338,14 +360,17 @@ function OnEditMenuClick()
 
 <div class="fixed-bottom d-flex m-2" >
  
-        <div class="col-4 text-start">
-            <button  onclick="PrevCard();" type="button" class=" btn btn-sm btn-primary  "><i class="bi bi-arrow-left-square"></i> Prev</button>
+        <div class="col-3 text-start">
+            <button  onclick="PrevCard();" type="button" class=" btn btn-sm btn-primary  "><i class="bi bi-arrow-left-square me-1"></i>Prev</button>
         </div>        
-        <div class="col-4 text-center">
-            <button  onclick="ShowCard();" type="button" class=" btn btn-sm btn-info  "><i class="bi bi-arrow-down-square"></i> Show</button>
+        <div class="col-3 text-center">
+            <button  onclick="ShowCard();" type="button" class=" btn btn-sm btn-info  "><i class="bi bi-arrow-down-square me-1"></i>Show</button>
         </div> 
-        <div class="col-4 text-end">
-            <button  onclick="NextCard();" type="button" class="btn btn-sm btn-primary ">Next <i class="bi bi-arrow-right-square"></i></button>
+        <div class="col-3 text-center">
+            <button  onclick="ShuffleWords();" type="button" class=" btn btn-sm btn-info  "><i class="bi bi-arrow-up-square me-1"></i>Rnd</button>
+        </div> 
+        <div class="col-3 text-end">
+            <button  onclick="NextCard();" type="button" class="btn btn-sm btn-primary ">Next <i class="bi bi-arrow-right-square ms-1"></i></button>
         </div>
         
 
