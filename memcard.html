@@ -206,9 +206,22 @@ function OnMCWords(req, res)
         CurrWordIndex = cwi;
     
     CreateCard(0);
+    
+    SetShuffleButtonStyle(false);
 }
 
 
+
+function SetShuffleButtonStyle(ishighlight)
+{
+    if (ishighlight)
+    {   $('#buttonshuffleid').addClass('btn-warning');
+        $('#buttonshuffleid').removeClass('btn-secondary');
+    } else
+    {   $('#buttonshuffleid').removeClass('btn-warning');
+        $('#buttonshuffleid').addClass('btn-secondary');
+    }
+}
 
 
 
@@ -302,6 +315,7 @@ function ShuffleWords()
    
     CurrWordIndex = NOTSET;
     CreateCard(0);
+    SetShuffleButtonStyle(true);
 
 }
 
@@ -367,7 +381,7 @@ function OnEditMenuClick()
             <button  onclick="ShowCard();" type="button" class=" btn btn-sm btn-info  "><i class="bi bi-arrow-down-square me-1"></i>Show</button>
         </div> 
         <div class="col-3 text-center">
-            <button  onclick="ShuffleWords();" type="button" class=" btn btn-sm btn-info  "><i class="bi bi-arrow-up-square me-1"></i>Rnd</button>
+            <button  id="buttonshuffleid" onclick="ShuffleWords();" type="button" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-up-square me-1"></i>Rnd</button>
         </div> 
         <div class="col-3 text-end">
             <button  onclick="NextCard();" type="button" class="btn btn-sm btn-primary ">Next <i class="bi bi-arrow-right-square ms-1"></i></button>
