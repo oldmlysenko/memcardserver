@@ -1,0 +1,24 @@
+reisen - подорожувати
+lesen - читати
+Wo - де
+Woher - звiдки
+Wohin - куди
+Wann - коли
+Was - що
+Wer - хто
+Wie - як
+Warum - чому
+Montag - понедiлок
+Dienstag -вiвторок
+Mittwoch - середа
+Donnerstag - четверг
+Freitag - п\`ятниця
+Samstag - субота
+Sonntag - недiля
+beschäftigt - зайнятий
+hier am ... vorbei - повз
+das Geld - грошi
+der Zeitplan - план дня
+die Mensa - кафетерiй у навчальному закладi
+die Stunden - години
+Warten - чекати

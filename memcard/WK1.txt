@@ -1,10 +1,5 @@
-#SSS BBB
-
-
 
 der_Stadtplan - карта мiста
-
-
 stimmen - бути правильним
 die beiden - обидва
 suchen - шукати
