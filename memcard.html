@@ -39,6 +39,7 @@ body
 
 
 function CurrWordIndexKey(colname){ return "CWI_"+colname;};
+function CurrIsReversedKey(colname){ return "CWR_"+colname;};
 const CurrCollectionKey ="CC";
 
 const NOTSET = -1;
@@ -47,11 +48,13 @@ var CurrWords = [];
 var CurrWordIndex = NOTSET;
 var CurrCollectionName = null;
 var CurrCollections = null;
-
+var CurrIsReversed = false;
 
 
 document.addEventListener('touchstart', handleTouchStart, false);        
 document.addEventListener('touchmove', handleTouchMove, false);
+document.addEventListener('dblclick', handleDoubleClick,false);
+
 
 var xDown = null;                                                        
 var yDown = null;
@@ -93,7 +96,7 @@ function handleTouchMove(evt)
     {
         if ( yDiff < 0 ) 
         {
-            ShowCard();
+            ShowCard(true);
         } else { 
             ShuffleWords();
         }                                                                 
@@ -104,8 +107,10 @@ function handleTouchMove(evt)
 };
 
 
-
-
+function handleDoubleClick(evt)
+{
+    ReverseWords();
+}
 
 
 
@@ -205,6 +210,10 @@ function OnMCWords(req, res)
     if ((cwi!=null) || (cwi!=NaN))
         CurrWordIndex = cwi;
     
+    var cwr = parseInt( GetCookie(CurrIsReversedKey(CurrCollectionName),"0") ); 
+    if ((cwr!=null) || (cwr!=NaN))
+        CurrIsReversed = cwr!=0;
+        
     CreateCard(0);
     
     SetShuffleButtonStyle(false);
@@ -261,8 +270,15 @@ function SayCurrWord()
     window.speechSynthesis.speak(utter);
 }
 
-function SetWord(wordstr)
+function SetWord(wordstr,transstr)
 {
+    if (CurrIsReversed)
+{
+        const tmp = wordstr;
+        wordstr = transstr;
+        transstr = tmp;
+    }
+
     const WORD_TOO_LONG = 15;
 
     $('#idword').html(wordstr);
@@ -271,6 +287,10 @@ function SetWord(wordstr)
     } else
     {   $('#idword').addClass('text-nowrap');
     } 
+    
+    $('#idtrans').html(transstr);
+    ShowCard(false);    
+    
 }
 
 function CreateCard(moveindex)
@@ -280,13 +300,19 @@ function CreateCard(moveindex)
 
     const data = WordData(moveindex);
 
-    SetWord(data.word.toString());
-    $('#idtrans').html(data.trans.toString());
-    $('#idtrans').hide();
+    SetWord(data.word.toString(),data.trans.toString());
 
     $('#idindex').html((CurrWordIndex+1).toString()+'('+CurrWords.length.toString()+')')    
     
     SetCookie(CurrWordIndexKey(CurrCollectionName),CurrWordIndex.toString());
+    
+    if (CurrIsReversed)
+    {   $('#buttonreverseid').addClass('btn-info');
+        $('#buttonreverseid').removeClass('btn-secondary');
+    } else
+    {   $('#buttonreverseid').removeClass('btn-info');
+        $('#buttonreverseid').addClass('btn-secondary');
+    }    
 }
 
 
@@ -301,9 +327,16 @@ function PrevCard()
     CreateCard(-1);
 }
 
-function ShowCard()
+function ShowCard(isshow)
+{
+    if (isshow)
 {
     $('#idtrans').show();
+        $('#idword').show();
+    } else
+    {   $('#idword').show();
+        $('#idtrans').hide();
+    }    
 }
 
 function ShuffleWords()
@@ -317,6 +350,14 @@ function ShuffleWords()
     CreateCard(0);
     SetShuffleButtonStyle(true);
 
+}
+
+function ReverseWords()
+{
+    CurrIsReversed = !CurrIsReversed;
+    SetCookie(CurrIsReversedKey(CurrCollectionName),CurrIsReversed ? "1" : "0");
+    
+    CreateCard(0);
 }
 
 
@@ -362,7 +403,7 @@ function OnEditMenuClick()
 <div class="d-flex aligns-items-center   position-absolute top-50 start-50 translate-middle ">
     <div class="container">
     <div class="row" >
-        <h1 id="idword" class="text-center display-1" onclick="SayCurrWord();">Word</h1>
+        <h1 id="idword" class="text-nowrap text-center display-1" onclick="SayCurrWord();">Word</h1>
     </div>
 
     <div class="row mt-2" style="height:80px;" >
@@ -374,17 +415,20 @@ function OnEditMenuClick()
 
 <div class="fixed-bottom d-flex m-2" >
  
-        <div class="col-3 text-start">
-            <button  onclick="PrevCard();" type="button" class=" btn btn-sm btn-primary  "><i class="bi bi-arrow-left-square me-1"></i>Prev</button>
+        <div class="col text-start">
+            <button  onclick="PrevCard();" type="button" class="btn  btn-primary  "><i class="bi bi-arrow-left-square h1"></i><br><small><i class="bi bi-arrow-left"></i></small></button>
         </div>        
-        <div class="col-3 text-center">
-            <button  onclick="ShowCard();" type="button" class=" btn btn-sm btn-info  "><i class="bi bi-arrow-down-square me-1"></i>Show</button>
+        <div class="col text-center">
+            <button  id="buttonshowid" onclick="ShowCard(true);" type="button" class="btn  btn-success  "><i class="bi bi-eye h1"></i><br><small><i class="bi bi-arrow-down"></i></small></button>
+        </div>        
+        <div class="col text-center">
+            <button  id="buttonshuffleid" onclick="ShuffleWords();" type="button" class="btn  btn-secondary"><i class="bi bi-shuffle h1" ></i></i><br><small><i class="bi bi-arrow-up"></i></small></button>
         </div> 
-        <div class="col-3 text-center">
-            <button  id="buttonshuffleid" onclick="ShuffleWords();" type="button" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-up-square me-1"></i>Rnd</button>
+        <div class="col text-center">
+            <button  id="buttonreverseid" onclick="ReverseWords();" type="button" class="btn  btn-info"><i class="bi bi-arrow-repeat h1"></i><br><small><i class="bi bi-dot"></i><i class="bi bi-dot"></i></small></button>
         </div> 
-        <div class="col-3 text-end">
-            <button  onclick="NextCard();" type="button" class="btn btn-sm btn-primary ">Next <i class="bi bi-arrow-right-square ms-1"></i></button>
+        <div class="col text-end">
+            <button  onclick="NextCard();" type="button" class="btn  btn-primary "><i class="bi bi-arrow-right-square h1"></i><br><small><i class="bi bi-arrow-right"></i></small></button>
         </div>
         
 
